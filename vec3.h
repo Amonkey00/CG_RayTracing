@@ -6,6 +6,7 @@
 
 using std::sqrt;
 using std::fabs;
+using std::fmin;
 
 inline double v_random_double() {
 	// Return a [0,1) double value
@@ -135,4 +136,19 @@ inline vec3 random_in_hemisphere(const vec3& normal) {
 
 static vec3 reflect(const vec3& v, const vec3& n) {
 	return v - 2 * dot(v, n) * n;
+}
+
+static vec3 refract(const vec3& uv, const vec3& n, double etai_over_etat) {
+	auto cos_theta = fmin(dot(-uv, n), 1.0);
+	vec3 r_out_prep = etai_over_etat * (uv + cos_theta * n);
+	vec3 r_out_parallel = -sqrt(fabs(1.0 - r_out_prep.length_squared())) * n;
+	return r_out_prep + r_out_parallel;
+}
+
+static vec3 random_in_unit_disk() {
+	while (true) {
+		auto p = vec3(v_random_double(-1, 1), v_random_double(-1, 1), 0);
+		if (p.length_squared() >= 1)continue;
+		return p;
+	}
 }
