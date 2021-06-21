@@ -2,9 +2,19 @@
 
 #include <cmath>
 #include <iostream>
-#include "rtweekend.h"
+
 
 using std::sqrt;
+using std::fabs;
+
+inline double v_random_double() {
+	// Return a [0,1) double value
+	return rand() / (RAND_MAX + 1.0);
+}
+
+inline double v_random_double(double min, double max) {
+	return min + (max - min) * v_random_double();
+}
 
 class vec3 {
 public:
@@ -40,12 +50,17 @@ public:
 		return e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
 	}
 
+	bool near_zero() const {
+		const auto s = 1e-8;
+		return (fabs(e[0] < s)) && (fabs(e[1] < s)) && (fabs(e[2] < s));
+	}
+
 	inline static vec3 random() {
-		return vec3(random_double(), random_double(), random_double());
+		return vec3(v_random_double(), v_random_double(), v_random_double());
 	}
 
 	inline static vec3 random(double min, double max) {
-		return vec3(random_double(min, max), random_double(min, max), random_double(min, max));
+		return vec3(v_random_double(min, max), v_random_double(min, max), v_random_double(min, max));
 	}
 
 public:
@@ -104,4 +119,20 @@ inline vec3 random_in_unit_shpere() {
 		if (p.length_squared() >= 1)continue;
 		return p;
 	}
+}
+
+inline vec3 random_unit_vector() {
+	return unit_vector(random_in_unit_shpere());
+}
+
+inline vec3 random_in_hemisphere(const vec3& normal) {
+	vec3 in_unit_sphere = random_in_unit_shpere();
+	if (dot(in_unit_sphere, normal) > 0.0)
+		return in_unit_sphere;
+	else
+		return -in_unit_sphere;
+}
+
+static vec3 reflect(const vec3& v, const vec3& n) {
+	return v - 2 * dot(v, n) * n;
 }
