@@ -3,6 +3,7 @@
 #include "color.h"
 #include "hittable_list.h"
 #include "sphere.h"
+#include "moving_sphere.h"
 #include "camera.h"
 #include "material.h"
 
@@ -14,8 +15,8 @@ hittable_list random_scene() {
     auto ground_materital = make_shared<lambertian>(color(0.5, 0.5, 0.5));
     world.add(make_shared<sphere>(point3(0, -1000, 0), 1000, ground_materital));
 
-    for (int a = -11; a < 11; a++) {
-        for (int b = -11; b < 11; b++) {
+    for (int a = -5; a < 5; a++) {
+        for (int b = -5; b < 5; b++) {
             auto choose_mat = random_double();
             point3 center(a + 0.9 * random_double(), 0.2, b + 0.9 * random_double());
 
@@ -28,16 +29,20 @@ hittable_list random_scene() {
                 if (choose_mat < 0.8) {
                     auto albedo = color::random() * color::random();
                     sphere_material = make_shared<lambertian>(albedo);
+                    auto center2 = center + vec3(0, random_double(0, .5), 0);
+                    world.add(make_shared<moving_sphere>(
+                        center, center2, 0.0, 1.0, 0.2, sphere_material));
                 }
                 else if (choose_mat < 0.95) {
                     auto albedo = color::random(0.5, 1);
                     auto fuzz = random_double(0, 0.5);
                     sphere_material = make_shared<metal>(albedo, fuzz);
+                    world.add(make_shared<sphere>(center, 0.2, sphere_material));
                 }
                 else {
                     sphere_material = make_shared<dielectric>(1.5);
+                    world.add(make_shared<sphere>(center, 0.2, sphere_material));
                 }
-                world.add(make_shared<sphere>(center, 0.2, sphere_material));
             }
         }
     }
@@ -77,11 +82,11 @@ color ray_color(const ray& r,const hittable& world,int depth) {
 int main() {
 
     // Image 形成的图片大小
-    const auto aspect_ratio = 3.0 / 2.0;
-    const int image_width = 300;
-    const int image_height = static_cast<int>(image_width / aspect_ratio);
-    const int samples_per_pixel = 100;
-    const int max_depth =10;
+    auto aspect_ratio = 16.0 / 9.0;
+    int image_width = 400;
+    int samples_per_pixel = 100;
+    int image_height = static_cast<int>(image_width / aspect_ratio);
+    const int max_depth =50;
 
     // World 构建物体空间
 
@@ -95,13 +100,13 @@ int main() {
     auto dist_to_focus = 10;
     auto aperture = 0.1;
 
-    camera cam(lookfrom,lookat,vup,20,aspect_ratio,aperture,dist_to_focus);
+    camera cam(lookfrom,lookat,vup,20,aspect_ratio,aperture,dist_to_focus,0.0,1.0);
 
     // Render
 
     std::cout << "P3\n" << image_width << " " << image_height << "\n255\n";
 
-    for (int j = image_height - 1; j >= 0; --j) {
+    for (int j = 208; j >= 0; --j) {
         std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
         for (int i = 0; i < image_width; ++i) {
             color pixel_color(0, 0, 0);
