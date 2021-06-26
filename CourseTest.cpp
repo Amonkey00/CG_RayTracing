@@ -12,8 +12,9 @@
 
 hittable_list random_scene() {
     hittable_list world;
-    auto ground_materital = make_shared<lambertian>(color(0.5, 0.5, 0.5));
-    world.add(make_shared<sphere>(point3(0, -1000, 0), 1000, ground_materital));
+
+    auto checker = make_shared<checker_texture>(color(0.8, 0.3, 0.1), color(0.9, 0.9, 0.9));
+    world.add(make_shared<sphere>(point3(0, -1000, 0), 1000, make_shared<lambertian>(checker)));
 
     for (int a = -5; a < 5; a++) {
         for (int b = -5; b < 5; b++) {
@@ -58,6 +59,16 @@ hittable_list random_scene() {
     return world;
 }
 
+hittable_list two_spheres() {
+    hittable_list objects;
+
+    auto checker = make_shared<checker_texture>(color(0.2, 0.3, 0.1), color(0.9, 0.9, 0.9));
+
+    objects.add(make_shared<sphere>(point3(0, -10, 0), 10, make_shared<lambertian>(checker)));
+    objects.add(make_shared<sphere>(point3(0, 10, 0), 10, make_shared<lambertian>(checker)));
+
+    return objects;
+}
 
 color ray_color(const ray& r,const hittable& world,int depth) {
     hit_record rec;
@@ -90,15 +101,35 @@ int main() {
 
     // World 构建物体空间
 
-    auto world = random_scene();
+    hittable_list world;
+
+    point3 lookfrom;
+    point3 lookat;
+    auto vfov = 40.0;
+    auto aperture = 0.0;
+
+    switch (0) {
+    case 1:
+        world = random_scene();
+        lookfrom = point3(13, 2, 3);
+        lookat = point3(0, 0, 0);
+        vfov = 20.0;
+        aperture = 0.1;
+        break;
+
+    default:
+    case 2:
+        world = two_spheres();
+        lookfrom = point3(13, 2, 3);
+        lookat = point3(0, 0, 0);
+        vfov = 20.0;
+        break;
+    }
 
 
     // Camera 初始化相机
-    point3 lookfrom(13, 2, 3);
-    point3 lookat(0, 0, 0);
     vec3 vup(0, 1, 0);
     auto dist_to_focus = 10;
-    auto aperture = 0.1;
 
     camera cam(lookfrom,lookat,vup,20,aspect_ratio,aperture,dist_to_focus,0.0,1.0);
 
@@ -106,7 +137,7 @@ int main() {
 
     std::cout << "P3\n" << image_width << " " << image_height << "\n255\n";
 
-    for (int j = 208; j >= 0; --j) {
+    for (int j = image_height-1; j >= 0; --j) {
         std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
         for (int i = 0; i < image_width; ++i) {
             color pixel_color(0, 0, 0);
