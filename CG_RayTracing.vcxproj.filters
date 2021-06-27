@@ -62,5 +62,14 @@
     <ClInclude Include="perlin.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="rtw_stb_image.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="stb_image.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="aarect.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

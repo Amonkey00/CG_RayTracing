@@ -22,7 +22,7 @@ private:
 		auto theta = acos(-p.y());
 		auto phi = atan2(-p.z(), p.x()) + pi;
 
-		v = phi / (2 * pi);
+		u = phi / (2 * pi);
 		v = theta / pi;
 	}
 };
